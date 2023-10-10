@@ -1,0 +1,12 @@
+ClumpBegin
+Vertex -%1$.4f %2$.4f 0  UV 0      0
+Vertex -%1$.4f 0      0  UV 0      %5$.4f
+Vertex  %1$.4f %2$.4f 0  UV %4$.4f 0
+Vertex  %1$.4f 0      0  UV %4$.4f %5$.4f
+Ambient .5
+Diffuse .4
+Texture tile31
+Collision %6$s
+TextureModes Foreshorten Lit
+Quad 1 2 4 3 tag %3$u
+ClumpEnd

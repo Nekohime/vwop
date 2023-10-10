@@ -1,0 +1,372 @@
+/* text-shadow: 2px 2px 7px white; */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+:root {
+  --main-colour: #999;
+  --heading-colour: #b2b2b2;
+  --bg: #111;
+  --bg-black: #000;
+  --bg-code: #2e2e2e;
+  --bg-drk: #191919;
+  --bg-drk-old: #282828F2;
+  --bg-gryish: #383838;
+  --red: #f00;
+  --grn: #280;
+  --blu: #4ad;
+  --gry: #b2b2b2;
+  --text-colour: #d3d3d3;
+  --gry-drkr: #999;
+  --orng: #d19a66;
+  --prpl: #C7D;
+  --yellow: #ebd040;
+  --wht: #fff;
+  --border-trim: #80808033;
+  --width: 75%;
+
+  /*
+  * Class Casing: kebab-case
+  *
+  * Layout Properties (position, float, clear, display)
+  * Box Model Properties (width, height, margin, padding)
+  * Visual Properties (color, background, border, box-shadow)
+  * Typography Properties (font-size, font-family, text-align, text-transform)
+  * Misc Properties (cursor, overflow, z-index)
+  */
+}
+
+#background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: -9999;
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin: auto;
+  background: var(--bg-black);
+  color: var(--text-colour);
+  font-family: Hack, Roboto, 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', Arial, monospace, Webdings;
+  font-display: swap;
+  font-size: 1.5em;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+header, footer, main {
+  border: 1px solid var(--border-trim);
+}
+
+header, footer {
+  width: var(--width);
+  padding: 10px;
+  margin: auto;
+  background: var(--bg-drk);
+}
+
+header {
+  margin-bottom: 10px;
+}
+
+footer {
+  margin-top: 15px;
+}
+
+main {
+  width: var(--width);
+  padding: 10px;
+  margin: auto;
+  padding-top: 0;
+  background: var(--bg-drk);
+}
+
+hr {
+  border: 1px dashed;
+  margin: 12px 0;
+}
+
+nav {
+  text-align: center;
+
+  & ul {
+    list-style: none;
+
+    & li::before {
+      content: '・';
+    }
+
+    & li:first-of-type::before {
+      content: '';
+    }
+
+    & li {
+      display: inline-block;
+    }
+  }
+}
+
+@keyframes scale-quote {
+  0% { transform: scale(0.85) rotate(5deg); }
+  50% { transform: scale(1) rotate(5deg); }
+  100% { transform: scale(0.85) rotate(5deg); }
+}
+
+.quote {
+  position: absolute;
+  top: 16px;
+  right: 0;
+  color: var(--yellow);
+  font-weight: bold;
+  transform: rotate(5deg); /* Minecraft does -8 degrees */
+  animation: scale-quote 0.58s infinite;
+  width: 384px;
+  text-align: center;
+}
+
+/* stylelint-disable no-descending-specificity */
+
+.article-list {
+  list-style: none;
+  padding: 0;
+
+  & li::before {
+    content: '・';
+  }
+
+  & li time::after {
+    content: '・';
+  }
+}
+
+/* stylelint-enable no-descending-specificity */
+
+.blog-title {
+  display: flex;
+  justify-content: center;
+}
+
+.center {
+  display: block;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  padding: 10px 0;
+  margin: 0;
+  color: var(--heading-colour);
+
+  &::before {
+    color: #ec4;
+  }
+}
+
+h1::before {
+  content: '# ';
+}
+
+h2::before {
+  content: '## ';
+}
+
+h3::before {
+  content: '### ';
+}
+
+h4::before {
+  content: '#### ';
+}
+
+h5::before {
+  content: '##### ';
+}
+
+h6::before {
+  content: '###### ';
+}
+
+em {
+  color: var(--blu);
+}
+
+strong {
+  color: var(--orng);
+}
+
+em strong {
+  color: var(--prpl);
+}
+
+/* Revisit Tables? */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  display: block;
+  overflow: auto;
+  width: 100%;
+}
+
+td,th {
+  padding: 0;
+}
+
+th {
+  font-weight: 600;
+}
+
+table td, table th {
+  border: 1px solid #dfe2e5;
+  padding: 6px 13px;
+}
+
+table tr {
+  background-color: var(--bg);
+  border-top: 1px solid #c6cbd1;
+}
+
+table tr:nth-child(2n) {
+  background-color: var(--bg-code);
+}
+
+/* Seriously, Revisit Tables */
+
+pre {
+  display: flex;
+  width: 100%;
+  margin: 0 auto;
+}
+
+pre code {
+  /* display: block; */
+  width: 95%;
+  padding: 4px 8px;
+  max-height: 512px;
+  background: var(--bg-code);
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin: 0 auto;
+
+  /* overflow-wrap: break-word; */
+}
+
+blockquote {
+  display: block;
+  width: 85%;
+  max-height: 512px;
+
+  /* margin: 0; TRBL */
+  margin-left: 0 0 0 16px;
+  padding-left: 8px;
+  background: var(--bg-code);
+  border-left: 10px solid var(--bg-gryish); /* Wha? */
+  overflow-y: auto;
+}
+
+img, picture, video, canvas, svg  {
+  /* display: block; Why would this be needed? */
+  display: block;
+  max-width: 100%;
+}
+
+/* link, visited, hover, active */
+a {
+  text-decoration: none;
+  color: #ec4;
+
+  &:hover {
+    text-decoration: underline;
+    color: var(--blu);
+  }
+
+  &:active {
+    color: var(--grn);
+  }
+
+  &[href$='.pdf']::after {
+    content: '🖺';
+  }
+}
+
+.external-link::after {
+	content: ' 🔗';
+}
+
+.xivcard  {
+  width: 100%;
+  color: white;
+
+  & h1 {
+    text-align: center;
+  }
+
+  & h1::before {
+    content: '# ';
+    color: #ec4;
+  }
+
+  & h2::before {
+    content: '# ';
+    color: #9de7fe;
+  }
+
+  & h2 {
+    color: #9de7fe;
+    text-align: center;
+  }
+
+  & ul {
+    text-align: center;
+    list-style: none;
+    /* stylelint-disable no-descending-specificity */
+    & li::before {
+      content: '♥ ';
+      color: red;
+    }
+    /* stylelint-enable no-descending-specificity */
+  }
+
+  & p {
+    color: #ff9fd2;
+    text-align: center;
+  }
+
+  & .xivcard-avatar {
+    margin: 0 auto;
+    border-radius: 50%;
+  }
+}
+
+.center-div {
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion) {
+  .quote {
+    animation: none;
+  }
+
+  #background {
+    display: none;
+  }
+}
+
+@media all and (width <= 1200px) {
+    header, main, footer {
+        width: 95%;
+    }
+	.quote {
+		display: none;
+	}
+}
