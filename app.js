@@ -1,13 +1,12 @@
 const fs = require('fs');
-const express = require('express')
+const express = require('express');
 
-const ejs = require('ejs');
+require('ejs');
 
-const app = express()
-const port = 8888
+const app = express();
+const port = 8888;
 
 app.set('view engine', 'ejs');
-
 app.use(express.static(__dirname + '/public'));
 
 
@@ -28,35 +27,34 @@ app.get('/', (req, res) => {
   // res.send('Here be indexing dragons')
 
   res.render('index', {
-    directories: directoriesList()
+    directories: listOfDirectoriesInPath(directories),
   });
-
 });
 
-//app.use('/rwx', serveIndex(__dirname + '/paths/rwx'));
-//app.use('/rwx', express.static(__dirname + '/paths/rwx/'))
+// app.use('/rwx', serveIndex(__dirname + '/paths/rwx'));
+// app.use('/rwx', express.static(__dirname + '/paths/rwx/'))
 
-function directoriesList() {
-  const listObj = fs.readdirSync('./paths/');
+function listOfDirectoriesInPath(dirs) {
   let html = '';
-  const list = listObj.forEach(file => {
-      html += '<li><a href='+ file +'>'+ file +'</a></li>'
+  dirs.forEach((file) => {
+    html += '<li><a href='+ file +'>' + file + '</a></li>';
   });
   return html;
 }
 
-function listDir(dir) {
+function listOfFilesInDirectory(dir) {
   const listObj = fs.readdirSync('./paths/' + dir);
   let html = '';
-  const list = listObj.forEach(file => {
+  const list = listObj.forEach((file) => {
     if (!file.endsWith('.sh')) {
-      html += '<a href=' + dir + file + '>' + file + '</a><br>'
+      html += '<a href=' + dir + file + '>' + file + '</a><br>';
     }
   });
   return html;
 }
 
 express.static.mime.define({
+  'text/css': ['css'],
   'text/plain': ['rwx'],
   'application/zip': ['zip'],
   'image/png': ['png'],
@@ -67,67 +65,65 @@ express.static.mime.define({
   'audio/wav': ['wav'],
   'audio/weba': ['weba'],
   'video/webm': ['webm'],
-  'image/webp': ['webp'],
+  'image/webp': ['webp']
 
 });
 
 // WIP: Handle prim creation
-function handleRequestedPrimRWX(file) {
-  if (file.endsWith('.rwx')) {
-    //file.startsWith('p:')
-    return "Hi";
-  } else {
-    return "Incorrect file format";
+function getPrimRWX(reqFile) {
+
+  if (reqFile.startsWith('p:')) { // Is Flat A Prim
+    console.log('We need to implement prims, still.');
+    // res.send(handleRequestedPrimRWX(reqFile))
+    //res.sendFile(`${path}/unknown.rwx`);
+    // Check if prim file is present in 'rwx'
+
+  } else if (reqFile.startsWith('p3:')) { // Is 3D Prim
+    console.log("User requested 3D Prim... Cannot fulfill.")
+    return `${path}/unknown.rwx`;
+  }
+  else {
+    console.log(`Attempting to serve RWX: ${fileToServe}`);
+    res.sendFile(fileToServe);
   }
 }
 
 directories.forEach((folder, i) => {
+
   app.get('/' + folder + '/', (req, res) => {
     // Serve File Index
     res.render('folder', {
-      files: listDir('/' + folder + '/'),
+      files: listOfFilesInDirectory('/' + folder + '/'),
       folder: folder,
-      directories: directoriesList()
+      directories: listOfDirectoriesInPath(directories),
     });
-    console.log("Client looking up index");
+    console.log('User requesting folder: ' + folder)
   });
 
   const path = `/var/www/html/3d/path3d/${folder}`;
   app.get('/' + folder + '/:file', (req, res) => {
     // Serve RWX Index
     const reqFile = `${req.params.file}`;
+    console.log(`reqFile: ${reqFile}`);
+
     const fileToServe = `${path}/${reqFile}`;
-    const folderExists = fs.existsSync(`${path}`);
+    console.log(`fileToServe: ${fileToServe}`);
 
-    if (folder == 'rwx') {
-      if (reqFile.startsWith('p:')) {
-        console.log("We need to implement prims, still.");
-        //res.send(handleRequestedPrimRWX(reqFile))
-        res.sendFile(`${path}/unknown.rwx`)
-      }
-    } else {
-      console.log(`Attempting to serve: ${fileToServe}`)
-      res.sendFile(fileToServe);
+
+    /*
+    if (folder === 'rwx' && reqFile.startsWith('p:') {
+      res.sendFile(getPrimRWX(reqFile));
+      return;
     }
-
-
-/*
-if (folderExists) {
-  console.log(`Attempting to serve: ${fileToServe}`)
-  res.sendFile(fileToServe);
-} else {
-  console.log(`Failure to serve: ${fileToServe}`)
-  res.sendStatus(404);
-}
-*/
+    if (folder === 'models') && (reqFile.startsWith('p:'))
+        res.sendFile(zipThis(getPrimRWX(reqFile)));
+    } */
+    console.log(`Attempting to serve file: [${fileToServe}]`);
+    res.sendFile(fileToServe);
   });
-
 });
 
 
-
-
-
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Example app listening on port ${port}`);
 });
