@@ -130,4 +130,12 @@ dist
 .pnp.*
 
 package-lock.json
-paths/
+paths/avatars
+paths/groups
+paths/models
+paths/pictures
+paths/rwx
+paths/seqs
+paths/sounds
+paths/textures
+
