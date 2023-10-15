@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Nekohime/vwop#readme",
   "dependencies": {
     "@vitejs/plugin-vue": "^4.4.0",
+    "compression": "^1.7.4",
     "ejs": "^3.1.9",
     "eslint": "^8.51.0",
     "eslint-config-google": "^0.14.0",

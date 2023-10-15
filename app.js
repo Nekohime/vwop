@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const compression = require('compression');
 
 require('ejs');
 
@@ -8,7 +9,7 @@ const port = 8888;
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/assets'));
-
+app.use(compression());
 
 const directories = [
   'rwx',
@@ -21,10 +22,8 @@ const directories = [
   'groups',
 ];
 
-
 app.get('/', (req, res) => {
   // Serve index
-  // res.send('Here be indexing dragons')
 
   res.render('index', {
     directories: listOfDirectoriesInPath(directories),
@@ -45,9 +44,10 @@ function listOfDirectoriesInPath(dirs) {
 function listOfFilesInDirectory(dir) {
   const listObj = fs.readdirSync('./paths/' + dir);
   let html = '';
-  const list = listObj.forEach((file) => {
+  listObj.forEach((file) => {
     if (!file.endsWith('.sh')) {
-      html += '<a href=' + dir + file + '>' + file + '</a><br>';
+      // html += '<a href=' + dir.replace(/^\/+/, '') + file + '>' + file + '</a><br>';
+      html += `<a href=${dir.replace(/^\/+/, '')}${file}>${file}</a><br>`;
     }
   });
   return html;
@@ -65,31 +65,27 @@ express.static.mime.define({
   'audio/wav': ['wav'],
   'audio/weba': ['weba'],
   'video/webm': ['webm'],
-  'image/webp': ['webp']
+  'image/webp': ['webp'],
 
 });
 
 // WIP: Handle prim creation
 function getPrimRWX(reqFile) {
-
   if (reqFile.startsWith('p:')) { // Is Flat A Prim
     console.log('We need to implement prims, still.');
     // res.send(handleRequestedPrimRWX(reqFile))
-    //res.sendFile(`${path}/unknown.rwx`);
+    // res.sendFile(`${path}/unknown.rwx`);
     // Check if prim file is present in 'rwx'
-
   } else if (reqFile.startsWith('p3:')) { // Is 3D Prim
-    console.log("User requested 3D Prim... Cannot fulfill.")
+    console.log('User requested 3D Prim... Cannot fulfill.');
     return `${path}/unknown.rwx`;
-  }
-  else {
+  } else {
     console.log(`Attempting to serve RWX: ${fileToServe}`);
     res.sendFile(fileToServe);
   }
 }
 
 directories.forEach((folder, i) => {
-
   app.get('/' + folder + '/', (req, res) => {
     // Serve File Index
     res.render('folder', {
@@ -97,7 +93,7 @@ directories.forEach((folder, i) => {
       folder: folder,
       directories: listOfDirectoriesInPath(directories),
     });
-    console.log('User requesting folder: ' + folder)
+    console.log('User requesting folder: ' + folder);
   });
 
   const path = `/var/www/html/3d/path3d/${folder}`;
