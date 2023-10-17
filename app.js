@@ -1,8 +1,12 @@
-const fs = require('fs');
-const express = require('express');
-const compression = require('compression');
+import * as fs from 'fs';
+import express from 'express';
+import compression from 'compression';
+import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
+import path from 'path';
+import {fileURLToPath} from 'url';
 
-require('ejs');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 8888;
@@ -30,9 +34,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// app.use('/rwx', serveIndex(__dirname + '/paths/rwx'));
-// app.use('/rwx', express.static(__dirname + '/paths/rwx/'))
-
 function listOfDirectoriesInPath(dirs) {
   let html = '';
   dirs.forEach((file) => {
@@ -46,7 +47,6 @@ function listOfFilesInDirectory(dir) {
   let html = '';
   listObj.forEach((file) => {
     if (!file.endsWith('.sh')) {
-      // html += '<a href=' + dir.replace(/^\/+/, '') + file + '>' + file + '</a><br>';
       html += `<a href=${dir.replace(/^\/+/, '')}${file}>${file}</a><br>`;
     }
   });
