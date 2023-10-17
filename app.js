@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import express from 'express';
 import compression from 'compression';
+import cors from 'cors';
 import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
 import path from 'path';
 import {fileURLToPath} from 'url';
@@ -14,6 +15,9 @@ const port = 8888;
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/assets'));
 app.use(compression());
+app.use(cors())
+
+const primNamespace = 'p:';
 
 const directories = [
   'rwx',
@@ -76,9 +80,6 @@ function getPrimRWX(reqFile) {
     // res.send(handleRequestedPrimRWX(reqFile))
     // res.sendFile(`${path}/unknown.rwx`);
     // Check if prim file is present in 'rwx'
-  } else if (reqFile.startsWith('p3:')) { // Is 3D Prim
-    console.log('User requested 3D Prim... Cannot fulfill.');
-    return `${path}/unknown.rwx`;
   } else {
     console.log(`Attempting to serve RWX: ${fileToServe}`);
     res.sendFile(fileToServe);
@@ -105,15 +106,13 @@ directories.forEach((folder, i) => {
     const fileToServe = `${path}/${reqFile}`;
     console.log(`fileToServe: ${fileToServe}`);
 
+    if (reqFile.startsWith(primNamespace)) {
+      const primName = reqFile.substring(2);
+      console.log('--prim--');
+      console.log("\t" + primNamespace + ' - ' + primName);
+      console.log('--endprim--');
 
-    /*
-    if (folder === 'rwx' && reqFile.startsWith('p:') {
-      res.sendFile(getPrimRWX(reqFile));
-      return;
     }
-    if (folder === 'models') && (reqFile.startsWith('p:'))
-        res.sendFile(zipThis(getPrimRWX(reqFile)));
-    } */
     console.log(`Attempting to serve file: [${fileToServe}]`);
     res.sendFile(fileToServe);
   });
