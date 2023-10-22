@@ -13,6 +13,28 @@
 <body>
     <%- include('partials/header.ejs'); %>
 		<h1><%- folder %></h1><br>
+		<div class="rwx-viewer-container">
+			<dialog class="rwx-viewer">
+				<iframe src="#" width=100% height=100%;></iframe>
+			</dialog>
+		</div>
+		<script>
+
+			const dialog = document.querySelector('dialog');
+
+			function viewModel(url) {
+				iframe.src = url;
+				dialog.showModal()
+			}
+
+			dialog.addEventListener('click', () => {
+				dialog.close()
+			});
+
+			const iframe = document.querySelector('iframe');
+			iframe.addEventListener('click', (event) => event.stopPropagation());
+
+		</script>
 		<%- files %>
 
     <%- include('partials/footer.ejs'); %>

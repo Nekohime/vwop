@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 import express from 'express';
+import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
 import compression from 'compression';
 import cors from 'cors';
-import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
+
+import * as fflate from 'fflate';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -15,7 +17,7 @@ const port = 8888;
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/assets'));
 app.use(compression());
-app.use(cors())
+app.use(cors());
 
 const primNamespace = 'p:';
 
@@ -29,6 +31,8 @@ const directories = [
   'pictures',
   'groups',
 ];
+
+const viewerURL = 'https://nekohime.net/rw/';
 
 app.get('/', (req, res) => {
   // Serve index
@@ -51,7 +55,17 @@ function listOfFilesInDirectory(dir) {
   let html = '';
   listObj.forEach((file) => {
     if (!file.endsWith('.sh')) {
-      html += `<a href=${dir.replace(/^\/+/, '')}${file}>${file}</a><br>`;
+      html += `<a href=${dir.replace(/^\/+/, '')}${file}>${file}</a>`;
+      html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
+      if (dir === '/rwx/' || dir === '/models/' || dir === 'avatars') {
+        html += ' <button onclick=viewModel("' + viewerURL + '?model=' + file + '")>View</button>';
+      }
+      if (dir === '/textures/') {
+        // TODO: Change preview object to prim
+        html += ' <button onclick=viewModel("' + viewerURL + '?model=aw-pp01.rwx&action=create+texture+' + file + '")>View</button>';
+      }
+
+      html += `<br>`;
     }
   });
   return html;
@@ -109,9 +123,8 @@ directories.forEach((folder, i) => {
     if (reqFile.startsWith(primNamespace)) {
       const primName = reqFile.substring(2);
       console.log('--prim--');
-      console.log("\t" + primNamespace + ' - ' + primName);
+      console.log('\t' + primNamespace + ' - ' + primName);
       console.log('--endprim--');
-
     }
     console.log(`Attempting to serve file: [${fileToServe}]`);
     res.sendFile(fileToServe);
