@@ -8,6 +8,8 @@ import * as fflate from 'fflate';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
+import PluginPrim from './prims.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -115,19 +117,22 @@ directories.forEach((folder, i) => {
   app.get('/' + folder + '/:file', (req, res) => {
     // Serve RWX Index
     const reqFile = `${req.params.file}`;
+    console.log('=====================================');
     console.log(`reqFile: ${reqFile}`);
 
     const fileToServe = `${path}/${reqFile}`;
-    console.log(`fileToServe: ${fileToServe}`);
+    const basePath = __dirname + '/';
 
-    if (reqFile.startsWith(primNamespace)) {
-      const primName = reqFile.substring(2);
-      console.log('--prim--');
-      console.log('\t' + primNamespace + ' - ' + primName);
-      console.log('--endprim--');
+    const primPlugin = new PluginPrim();
+    const prim = primPlugin.handleRequest(folder, reqFile);
+
+    if (prim) {
+      res.sendFile(basePath + prim);
+    } else {
+      res.sendFile(fileToServe);
     }
-    console.log(`Attempting to serve file: [${fileToServe}]`);
-    res.sendFile(fileToServe);
+
+    // console.log(`Attempting to serve file: [${fileToServe}]`);
   });
 });
 
