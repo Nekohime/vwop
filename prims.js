@@ -48,13 +48,12 @@ export default class PluginPrim {
 
     // First, check for local file...
     if (fs.existsSync(path)) {
-      console.log('h');
       PluginPrim.gotoFile(PluginPrim.Cache, file);
     }
 
     const type = matches.groups.type;
     const params = matches.groups.params.split(',');
-    console.log('Prim', `Trying to generate a ${type} with ${matches.groups.params}`);
+    // console.log('Prim', `Trying to generate a ${type} with ${matches.groups.params}`);
 
     let primContent;
 
@@ -156,9 +155,13 @@ export default class PluginPrim {
     if (values[1] && values[1] === 's') {
       tag = 100;
     }
+    console.log(values);
     // UV coordinates
-    const uvX = values[2] || false;
-    const uvY = values[3] || false;
+    // const uvX = values[2] || false;
+    // const uvY = values[3] || false;
+    const uvX = (typeof values[2] !== 'undefined') ? values[2] : false;
+    const uvY = (typeof values[3] !== 'undefined') ? values[3] : false;
+
     const uv = (type === PluginPrim.FlatFlat || type === PluginPrim.FlatPanel || type === PluginPrim.FlatFacer) ?
       PluginPrim.uvFill(uvX, uvY) :
       PluginPrim.uvPlanar(uvX, uvY, rawX, rawY);
@@ -167,7 +170,8 @@ export default class PluginPrim {
     console.log('Flat', `Type: ${type}`);
     console.log('Flat', `Dimensions: ${dimX} by ${dimY}, tag: ${tag}, uvX scale: ${uv[0]}, uvY scale: ${uv[1]}, collision: ${phantom}`);
     const template = PluginPrim.getPrimTemplate(type);
-    const prim = template.replace(/%1\$.4f/g, dimX)
+    const prim = template
+        .replace(/%1\$.4f/g, dimX)
         .replace(/%2\$.4f/g, dimY)
         .replace(/%3\$u/g, tag)
         .replace(/%4\$.4f/g, uv[0])
@@ -190,26 +194,27 @@ export default class PluginPrim {
     } else if (!isNaN(x) && !isNaN(y)) {
       return [parseFloat(x), parseFloat(y)];
     } else {
-      PluginPrim.gotoError(400, 'Invalid UV parameters');
+      // PluginPrim.gotoError(400, 'Invalid UV parameters');
+      throw new Error('Invalid UV parameters');
     }
   }
 
   static uvPlanar(x, y, rawX, rawY) {
+    let uvX = null;
+    let uvY = null;
     if (!x) {
-      const uvX = rawX / (PluginPrim.MMUV / 1);
-      const uvY = rawY / (PluginPrim.MMUV / 1);
-      return [uvX, uvY];
+      uvX = rawX / (PluginPrim.MMUV / 1);
+      uvY = rawY / (PluginPrim.MMUV / 1);
     } else if (!isNaN(x) && !y) {
-      const uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
-      const uvY = rawY / (PluginPrim.MMUV / parseFloat(x));
-      return [uvX, uvY];
+      uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
+      uvY = rawY / (PluginPrim.MMUV / parseFloat(x));
     } else if (!isNaN(x) && !isNaN(y)) {
-      const uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
-      const uvY = rawY / (PluginPrim.MMUV / parseFloat(y));
-      return [uvX, uvY];
+      uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
+      uvY = rawY / (PluginPrim.MMUV / parseFloat(y));
     } else {
-      PluginPrim.gotoError(400, 'Invalid UV parameters');
+      throw new Error('Invalid UV parameters');
     }
+    return [uvX, uvY];
   }
 
   static parseTagNumber(val) {

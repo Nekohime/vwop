@@ -1,17 +1,31 @@
 import * as fs from 'fs';
 import express from 'express';
-import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
+// import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
 import compression from 'compression';
 import cors from 'cors';
-
-import * as fflate from 'fflate';
 import path from 'path';
 import {fileURLToPath} from 'url';
-
 import PluginPrim from './prims.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// URL to Model Viewer (not included)
+const viewerURL = 'https://nekohime.net/rw/';
+const baseVWOPPath = path.join(__dirname, '/'); // ~/git/vwop/
+// Where OP folders are. They are defined in directories[] below
+const serverBasePath = '/var/www/html/3d/path3d/';
+const directories = [
+  'rwx',
+  // 'models',
+  'avatars',
+  'textures',
+  'seqs',
+  'sounds',
+  'pictures',
+  'groups',
+];
+const primNamespace = 'p:'; // Prim Prefix
 
 const app = express();
 const port = 8888;
@@ -20,21 +34,6 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/assets'));
 app.use(compression());
 app.use(cors());
-
-const primNamespace = 'p:';
-
-const directories = [
-  'rwx',
-  'models',
-  'avatars',
-  'textures',
-  'seqs',
-  'sounds',
-  'pictures',
-  'groups',
-];
-
-const viewerURL = 'https://nekohime.net/rw/';
 
 app.get('/', (req, res) => {
   // Serve index
@@ -46,32 +45,41 @@ app.get('/', (req, res) => {
 
 function listOfDirectoriesInPath(dirs) {
   let html = '';
-  dirs.forEach((file) => {
-    html += '<li><a href='+ file +'>' + file + '</a></li>';
+  dirs.forEach((dir) => {
+    html += '<li><a href="/' + dir + '">' + dir + '</a></li>';
   });
   return html;
 }
+
 
 function listOfFilesInDirectory(dir) {
-  const listObj = fs.readdirSync('./paths/' + dir);
-  let html = '';
-  listObj.forEach((file) => {
-    if (!file.endsWith('.sh')) {
-      html += `<a href=${dir.replace(/^\/+/, '')}${file}>${file}</a>`;
-      html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
-      if (dir === '/rwx/' || dir === '/models/' || dir === 'avatars') {
-        html += ' <button onclick=viewModel("' + viewerURL + '?model=' + file + '")>View</button>';
-      }
-      if (dir === '/textures/') {
-        // TODO: Change preview object to prim
-        html += ' <button onclick=viewModel("' + viewerURL + '?model=aw-pp01.rwx&action=create+texture+' + file + '")>View</button>';
-      }
+  try {
+    const listObj = fs.readdirSync(serverBasePath + dir);
+    let html = '';
 
-      html += `<br>`;
-    }
-  });
-  return html;
+    listObj.forEach((file) => {
+      if (!file.endsWith('.sh')) {
+        html += `<a href="${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
+        html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
+
+        if (dir === '/rwx/' || dir === '/models/' || dir === '/avatars/') {
+          html += ' <button onclick=viewModel("' + viewerURL + '?model=' + file + '")>View</button>';
+        }
+
+        if (dir === '/textures/') {
+          html += ' <button onclick=viewModel("' + viewerURL + '?model=aw-pp01.rwx&action=create+texture+' + file + '")>View</button>';
+        }
+
+        html += `<br>`;
+      }
+    });
+
+    return html;
+  } catch (error) {
+    console.error(`Error reading directory ${dir}: ${error.message}`)
+  }
 }
+
 
 express.static.mime.define({
   'text/css': ['css'],
@@ -89,17 +97,9 @@ express.static.mime.define({
 
 });
 
-// WIP: Handle prim creation
-function getPrimRWX(reqFile) {
-  if (reqFile.startsWith('p:')) { // Is Flat A Prim
-    console.log('We need to implement prims, still.');
-    // res.send(handleRequestedPrimRWX(reqFile))
-    // res.sendFile(`${path}/unknown.rwx`);
-    // Check if prim file is present in 'rwx'
-  } else {
-    console.log(`Attempting to serve RWX: ${fileToServe}`);
-    res.sendFile(fileToServe);
-  }
+function isValidFileName(fileName) {
+  const regex = /^[a-zA-Z0-9.,:_-]+$/;
+  return regex.test(fileName);
 }
 
 directories.forEach((folder, i) => {
@@ -113,21 +113,28 @@ directories.forEach((folder, i) => {
     console.log('User requesting folder: ' + folder);
   });
 
-  const path = `/var/www/html/3d/path3d/${folder}`;
+
+
+  const folderPath = `${serverBasePath}${folder}`;
   app.get('/' + folder + '/:file', (req, res) => {
     // Serve RWX Index
     const reqFile = `${req.params.file}`;
+    if (!isValidFileName(reqFile)) {
+      return res.status(400).send('Invalid filename');
+    }
     console.log('=====================================');
-    console.log(`reqFile: ${reqFile}`);
+    // console.log(`reqFile: ${reqFile}`);
 
-    const fileToServe = `${path}/${reqFile}`;
-    const basePath = __dirname + '/';
+    // const fileToServe = `${path}/${reqFile}`;
+    const fileToServe = path.join(folderPath, reqFile);
+    // const basePath = __dirname + '/';
+
 
     const primPlugin = new PluginPrim();
     const prim = primPlugin.handleRequest(folder, reqFile);
 
     if (prim) {
-      res.sendFile(basePath + prim);
+      res.sendFile(baseVWOPPath + prim);
     } else {
       res.sendFile(fileToServe);
     }

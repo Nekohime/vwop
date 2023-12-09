@@ -61,6 +61,8 @@ p:flr400,,.1.rwx
 - Supporting both zipped (/models/) and unzipped (/rwx/, for WideWorlds) modes. At least until WideWorlds loads zipped models.
 - Pagination, search.
 - Zipped prims (only supports unzipped at the moment)
+  - Impossible: prove me wrong with a PR :)))))))
 - It assumes one folder structure and one model viewer url at the moment.
   - TODO: Fix this and have at least variables at the top of the main file to change these.
 - Single-sided versions of triangle and trifloor
+- .5 uvX, uvY default?
