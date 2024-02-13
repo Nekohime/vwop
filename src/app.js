@@ -1,17 +1,26 @@
 import * as fs from 'fs';
 import express from 'express';
+import path from 'path';
 // import * as ejs from 'ejs'; // eslint-disable-line no-unused-vars
+import { Eta } from 'eta';
 import compression from 'compression';
 import cors from 'cors';
-import path from 'path';
 import {fileURLToPath} from 'url';
 import PluginPrim from './prims.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const devMode = true;
+
 // URL to Model Viewer (not included)
 const viewerURL = 'https://3d.nekohime.net/rw/';
+let baseHrefSubfolder = '';
+let baseHref = 'http://localhost:8888/';
+const baseHrefProd = 'https://3d.nekohime.net/vwop/';
+
+if (!devMode) baseHref = baseHrefProd;
+
 const baseVWOPPath = path.join(__dirname, '/'); // ~/git/vwop/
 // Where OP folders are. They are defined in directories[] below
 const serverBasePath = '/var/www/html/3d/paths/terra/';
@@ -30,23 +39,39 @@ const primNamespace = 'p:'; // Prim Prefix
 const app = express();
 const port = 8888;
 
-app.set('view engine', 'ejs');
+//app.set('view engine', 'ejs');
+const eta = new Eta({
+  views: path.join(__dirname, "views"),
+
+  cache: true,
+  useWith: true,
+  autoEscape: false,
+
+});
+
 app.use(express.static(__dirname + '/assets'));
-app.use(compression());
-app.use(cors());
+// app.use(compression());
+// app.use(cors());
+
+
 
 app.get('/', (req, res) => {
   // Serve index
-
-  res.render('index', {
+  const renderedTemplate = eta.render("index", {
+    baseHref: baseHref,
     directories: listOfDirectoriesInPath(directories),
-  });
+  })
+
+  res.status(200).send(renderedTemplate);
 });
+
+
 
 function listOfDirectoriesInPath(dirs) {
   let html = '';
   dirs.forEach((dir) => {
-    html += '<li><a href="/vwop/' + dir + '">' + dir + '</a></li>';
+    html += '<li><a href="/' + dir + '">' + dir + '</a></li>';
+
   });
   return html;
 }
@@ -59,7 +84,7 @@ function listOfFilesInDirectory(dir) {
 
     listObj.forEach((file) => {
       if (!file.endsWith('.sh')) {
-        html += `<a href="/vwop${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
+        html += `<a href="${baseHrefSubfolder}${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
         html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
 
         if (dir === '/rwx/' || dir === '/models/' || dir === '/avatars/') {
@@ -102,22 +127,25 @@ function isValidFileName(fileName) {
   return regex.test(fileName);
 }
 
+
 directories.forEach((folder, i) => {
+
   app.get('/' + folder + '/', (req, res) => {
     // Serve File Index
-    res.render('folder', {
+    const renderedTemplate = eta.render('folder', {
       files: listOfFilesInDirectory('/' + folder + '/'),
       folder: folder,
       directories: listOfDirectoriesInPath(directories),
-    });
+    })
     console.log('User requesting folder: ' + folder);
+    res.status(200).send(renderedTemplate);
   });
-
 
 
   const folderPath = `${serverBasePath}${folder}`;
   app.get('/' + folder + '/:file', (req, res) => {
     // Serve RWX Index
+
     const reqFile = `${req.params.file}`;
     if (!isValidFileName(reqFile)) {
       return res.status(400).send('Invalid filename');
@@ -130,7 +158,7 @@ directories.forEach((folder, i) => {
     // const basePath = __dirname + '/';
 
 
-    const primPlugin = new PluginPrim();
+    const primPlugin = new PluginPrim(baseVWOPPath);
     const prim = primPlugin.handleRequest(folder, reqFile);
 
     if (prim) {
@@ -142,6 +170,7 @@ directories.forEach((folder, i) => {
     // console.log(`Attempting to serve file: [${fileToServe}]`);
   });
 });
+
 
 
 app.listen(port, () => {
