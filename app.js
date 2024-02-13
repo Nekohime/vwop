@@ -11,10 +11,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // URL to Model Viewer (not included)
-const viewerURL = 'https://nekohime.net/rw/';
+const viewerURL = 'https://3d.nekohime.net/rw/';
 const baseVWOPPath = path.join(__dirname, '/'); // ~/git/vwop/
 // Where OP folders are. They are defined in directories[] below
-const serverBasePath = '/var/www/html/3d/path3d/';
+const serverBasePath = '/var/www/html/3d/paths/terra/';
 const directories = [
   'rwx',
   // 'models',
@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 function listOfDirectoriesInPath(dirs) {
   let html = '';
   dirs.forEach((dir) => {
-    html += '<li><a href="/' + dir + '">' + dir + '</a></li>';
+    html += '<li><a href="/vwop/' + dir + '">' + dir + '</a></li>';
   });
   return html;
 }
@@ -59,7 +59,7 @@ function listOfFilesInDirectory(dir) {
 
     listObj.forEach((file) => {
       if (!file.endsWith('.sh')) {
-        html += `<a href="${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
+        html += `<a href="/vwop${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
         html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
 
         if (dir === '/rwx/' || dir === '/models/' || dir === '/avatars/') {

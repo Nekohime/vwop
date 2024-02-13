@@ -1,6 +1,6 @@
 # Virtual World Object Path
 
-An Asset Server for a certain of Virtual Worlds.
+An Asset Server for a certain family of Virtual Worlds.
 
 ## Setup
 
