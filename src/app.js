@@ -15,15 +15,22 @@ const devMode = true;
 
 // URL to Model Viewer (not included)
 const viewerURL = 'https://3d.nekohime.net/rw/';
-let baseHrefSubfolder = '';
+
+// set this to '' if you want the server
+//  to serve from mydomain.com/ and NOT from mydomain.com/whatever/
+let vwopSubfolder = 'vwop';
+const routePrefix = vwopSubfolder ? `/${vwopSubfolder}/` : '/';
+
 let baseHref = 'http://localhost:8888/';
 const baseHrefProd = 'https://3d.nekohime.net/vwop/';
 
 if (!devMode) baseHref = baseHrefProd;
 
-const baseVWOPPath = path.join(__dirname, '/'); // ~/git/vwop/
+const baseVWOPPath = path.join(__dirname, '../'); // ~/git/vwop/
+console.log(baseVWOPPath)
 // Where OP folders are. They are defined in directories[] below
-const serverBasePath = '/var/www/3d/terra';
+// Where the path folders live, end with a forward slash /
+const serverBasePath = '/var/www/3d/terra/';
 const directories = [
   'rwx',
   // 'models',
@@ -53,9 +60,7 @@ app.use(express.static(__dirname + '/assets'));
 // app.use(compression());
 // app.use(cors());
 
-
-
-app.get('/', (req, res) => {
+app.get(routePrefix + '/', (req, res) => {
   // Serve index
   const renderedTemplate = eta.render("index", {
     baseHref: baseHref,
@@ -70,7 +75,7 @@ app.get('/', (req, res) => {
 function listOfDirectoriesInPath(dirs) {
   let html = '';
   dirs.forEach((dir) => {
-    html += '<li><a href="/' + dir + '">' + dir + '</a></li>';
+    html += '<li><a href="'+ vwopSubfolder + '/' + dir + '">' + dir + '</a></li>';
 
   });
   return html;
@@ -84,7 +89,7 @@ function listOfFilesInDirectory(dir) {
 
     listObj.forEach((file) => {
       if (!file.endsWith('.sh')) {
-        html += `<a href="${baseHrefSubfolder}${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
+        html += `<a href="${vwopSubfolder}${(dir + file).replace(/\/+/g, '/')}">${file}</a>`;
         html += ' <button onclick=navigator.clipboard.writeText("' + file + '");>Copy</button>';
 
         if (dir === '/rwx/' || dir === '/models/' || dir === '/avatars/') {
@@ -130,9 +135,10 @@ function isValidFileName(fileName) {
 
 directories.forEach((folder, i) => {
 
-  app.get('/' + folder + '/', (req, res) => {
+  app.get(routePrefix + folder + '/', (req, res) => {
     // Serve File Index
     const renderedTemplate = eta.render('folder', {
+      baseHref: baseHref,
       files: listOfFilesInDirectory('/' + folder + '/'),
       folder: folder,
       directories: listOfDirectoriesInPath(directories),
@@ -143,7 +149,7 @@ directories.forEach((folder, i) => {
 
 
   const folderPath = `${serverBasePath}${folder}`;
-  app.get('/' + folder + '/:file', (req, res) => {
+  app.get(routePrefix + folder + '/:file', (req, res) => {
     // Serve RWX Index
 
     const reqFile = `${req.params.file}`;
@@ -158,8 +164,9 @@ directories.forEach((folder, i) => {
     // const basePath = __dirname + '/';
 
 
-    const primPlugin = new PluginPrim(baseVWOPPath);
+    const primPlugin = new PluginPrim("~/git/vwop/");
     const prim = primPlugin.handleRequest(folder, reqFile);
+    console.log('help me? ', folder, reqFile)
 
     if (prim) {
       res.sendFile(baseVWOPPath + prim);
