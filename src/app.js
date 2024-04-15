@@ -23,7 +23,7 @@ if (!devMode) baseHref = baseHrefProd;
 
 const baseVWOPPath = path.join(__dirname, '/'); // ~/git/vwop/
 // Where OP folders are. They are defined in directories[] below
-const serverBasePath = '/var/www/html/3d/paths/terra/';
+const serverBasePath = '/var/www/3d/terra';
 const directories = [
   'rwx',
   // 'models',

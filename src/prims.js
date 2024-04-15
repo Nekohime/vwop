@@ -4,8 +4,8 @@ import * as path from 'path';
 export default class PluginPrim {
   static RegexPrim = /^(p:)?(?<filename>(?<name>(?<type>[a-z]+)(?<params>.+?))\.rwx)$/i;
   static RegexFlatParams = /^(?<x>[0-9]+\.?[0-9]*)(x(?<y>[0-9]+\.?[0-9]*))?(?<p>p)?$/i;
-  static Cache = 'prims';
-  static Templates = 'assets/prims/templates';
+  static Cache = '';
+  static Templates = 'src/assets/prims/templates';
   static MMX = 1000.0;
   static MMY = 1000.0;
   static MMUV = 100.0;
@@ -18,9 +18,12 @@ export default class PluginPrim {
   static FlatFacer = 'facer';
   static FlatTriangle = 'triangle';
   static FlatTrifloor = 'trifloor';
+  static baseVWOPPath = '';
 
-  constructor() {
+  constructor(baseVWOPPath) {
     // Initialize your class as needed
+    PluginPrim.baseVWOPPath = baseVWOPPath;
+    PluginPrim.Cache = 'prims';
   }
 
   getName() {
@@ -45,7 +48,7 @@ export default class PluginPrim {
 
     file = 'p:' + matches.groups.filename;
     const path = PluginPrim.pathJoin([PluginPrim.Cache, file]);
-
+    console.log(' ????????????? ' + path + ' ????????????? ' )
     // First, check for local file...
     if (fs.existsSync(path)) {
       PluginPrim.gotoFile(PluginPrim.Cache, file);

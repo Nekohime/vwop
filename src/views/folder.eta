@@ -11,8 +11,8 @@
 	<link href="main.css" media="all" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <%- include('partials/header.ejs'); %>
-		<h1><%- folder %></h1><br>
+	<%~ include('./partials/header.eta', {directories: directories}); %> <!--, {directories: directories}-->
+		<h1><%~ folder %></h1><br>
 		<div class="rwx-viewer-container">
 			<dialog class="rwx-viewer">
 				<iframe src="#" width=100% height=100%;></iframe>
@@ -35,8 +35,8 @@
 			iframe.addEventListener('click', (event) => event.stopPropagation());
 
 		</script>
-		<%- files %>
+		<%~ files %>
 
-    <%- include('partials/footer.ejs'); %>
+    <%~ include('partials/footer.eta'); %>
   </body>
 </html>
