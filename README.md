@@ -1,19 +1,18 @@
 # Virtual World Object Path
 
-An Asset Server for a certain of Virtual Worlds.
+An Asset Server for a family of Virtual Worlds.
 
 ## Setup
 
-`npm install`
+Install dependencies: `npm install`  
+Run: `npm start` or `./run.sh`  
 
-You need to symlink your object path folders inside ./paths/ (stuff like rwx, models, avatars, sounds, seqs, etc.)
-
-To run, `npm start`
+You may need to change some configuration variables in app.js  
 
 ## Features
 
 - Flat prims
-  - Cached
+  - ~~Cached~~ Caching currently broken
 - Model Viewer in <iframe> in <dialog> (view button)
 - Copy button to copy filename to clipboard
 
@@ -58,11 +57,19 @@ p:flr400,,.1.rwx
 
 ## Roadmap
 
-- Supporting both zipped (/models/) and unzipped (/rwx/, for WideWorlds) modes. At least until WideWorlds loads zipped models.
 - Pagination, search.
 - Zipped prims (only supports unzipped at the moment)
-  - Impossible: prove me wrong with a PR :)))))))
-- It assumes one folder structure and one model viewer url at the moment.
-  - TODO: Fix this and have at least variables at the top of the main file to change these.
 - Single-sided versions of triangle and trifloor
 - .5 uvX, uvY default?
+
+## NGINX Setup
+
+```nginx
+	location /vwop/ {
+		proxy_pass http://localhost:8888/vwop/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+	}
+```

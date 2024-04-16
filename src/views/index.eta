@@ -13,7 +13,7 @@
 </head>
 <body>
     <%~ include('./partials/header.eta', {directories: directories}); %> <!--, {directories: directories}-->
-		Virtual World Path is an Object Path Server for Virtual Worlds such as Virtual Paradise and WideWorlds, etc.
+		Virtual World Path is an Object Path Server for Virtual Worlds such as Virtual Paradise and WideWorlds.
 
     <%~ include('./partials/footer.eta'); %>
   </body>
