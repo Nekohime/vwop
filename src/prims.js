@@ -1,62 +1,67 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+// eslint-disable-next-line
+const regexPrim = /^(p:)?(?<filename>(?<name>(?<type>[a-z]+)(?<params>.+?))\.rwx)$/i;
+// eslint-disable-next-line
+const regexFlatParams = /^(?<x>[0-9]+\.?[0-9]*)(x(?<y>[0-9]+\.?[0-9]*))?(?<p>p)?$/i;
+
+/**
+ * Represents a PluginPrim class for handling primitive requests.
+ */
 export default class PluginPrim {
-  static RegexPrim = /^(p:)?(?<filename>(?<name>(?<type>[a-z]+)(?<params>.+?))\.rwx)$/i;
-  static RegexFlatParams = /^(?<x>[0-9]+\.?[0-9]*)(x(?<y>[0-9]+\.?[0-9]*))?(?<p>p)?$/i;
-  static Cache = '';
-  static Templates = 'src/assets/prims/templates';
-  static MMX = 1000.0;
-  static MMY = 1000.0;
-  static MMUV = 100.0;
-  static MinValue = 0.001;
-  static MaxValue = 32.0;
-  static FlatWall = 'wall';
-  static FlatPanel = 'panel';
-  static FlatFloor = 'floor';
-  static FlatFlat = 'flat';
-  static FlatFacer = 'facer';
-  static FlatTriangle = 'triangle';
-  static FlatTrifloor = 'trifloor';
-  static baseVWOPPath = '';
-
+/**
+ * Creates an instance of PluginPrim.
+ * @param {string} baseVWOPPath - The base VWOP path.
+ */
   constructor(baseVWOPPath) {
-    // Initialize your class as needed
-    PluginPrim.baseVWOPPath = baseVWOPPath;
-    PluginPrim.Cache = 'prims';
+    this.baseVWOPPath = baseVWOPPath;
+    this.cache = 'prims';
+    this.templates = 'src/assets/prims/templates';
+
+    this.mmx = 1000.0;
+    this.mmy = 1000.0;
+    this.mmuv = 100.0;
+    this.minValue = 0.001;
+    this.maxValue = 32.0;
+    this.flatWall = 'wall';
+    this.flatPanel = 'panel';
+    this.flatFloor = 'floor';
+    this.flatFlat = 'flat';
+    this.flatFacer = 'facer';
+    this.flatTriangle = 'triangle';
+    this.flatTrifloor = 'trifloor';
   }
 
-  getName() {
-    return 'Prim generator';
-  }
-
+  /**
+   * Handles a request for a Prim.
+   * @param {string} dir - The directory.
+   * @param {string} file - The file.
+   * @return {string|boolean} - The path or false.
+   */
   handleRequest(dir, file) {
-    console.log('Prims', `Checking if I handle ${dir}/${file}`);
-
     // Only handle rwx request
     if (dir !== 'rwx') {
       return false;
     }
 
     // Validate requests
-    const matches = file.match(PluginPrim.RegexPrim);
+    const matches = file.match(regexPrim);
     if (!matches) {
       return false;
     } else {
-      console.log('Prims', `Handling request for ${file} (${matches.groups.filename})`);
+      console.log('Prims',
+          `Handling request for ${file} (${matches.groups.filename})`);
     }
 
     file = 'p:' + matches.groups.filename;
-    const path = PluginPrim.pathJoin([PluginPrim.Cache, file]);
-    console.log(' ????????????? ' + path + ' ????????????? ' );
+    // const filePath = path.join(this.cache, file);
+    const primFilePath = path.join(this.baseVWOPPath, this.cache, file);
     // First, check for local file...
-    if (fs.existsSync(path)) {
-      PluginPrim.gotoFile(PluginPrim.Cache, file);
-    }
+
 
     const type = matches.groups.type;
     const params = matches.groups.params.split(',');
-    // console.log('Prim', `Trying to generate a ${type} with ${matches.groups.params}`);
 
     let primContent;
 
@@ -64,39 +69,39 @@ export default class PluginPrim {
       case 'w':
       case 'wll':
       case 'wall':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatWall);
+        primContent = this.makeFlat(params, this.flatWall);
         break;
 
       case 'p':
       case 'pan':
       case 'panel':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatPanel);
+        primContent = this.makeFlat(params, this.flatPanel);
         break;
 
       case 'f':
       case 'flr':
       case 'floor':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatFloor);
+        primContent = this.makeFlat(params, this.flatFloor);
         break;
 
       case 'flt':
       case 'flat':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatFlat);
+        primContent = this.makeFlat(params, this.flatFlat);
         break;
 
       case 'fac':
       case 'facer':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatFacer);
+        primContent = this.makeFlat(params, this.flatFacer);
         break;
 
       case 'tri':
       case 'triangle':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatTriangle);
+        primContent = this.makeFlat(params, this.flatTriangle);
         break;
 
       case 'triflr':
       case 'trifloor':
-        primContent = PluginPrim.makeFlat(params, PluginPrim.FlatTrifloor);
+        primContent = this.makeFlat(params, this.flatTrifloor);
         break;
 
         // Add more cases as needed...
@@ -105,74 +110,79 @@ export default class PluginPrim {
         return false;
     }
 
-
     if (!primContent) {
-      PluginPrim.gotoError(400, 'Unknown prim generator error');
+      this.gotoError(400, 'Unknown prim generator error');
     }
 
-    console.log('Prim', `Saving prim '${file}'`);
-
-    if (!fs.existsSync(PluginPrim.Cache)) {
-      fs.mkdirSync(PluginPrim.Cache);
+    if (!fs.existsSync(this.cache)) {
+      fs.mkdirSync(this.cache);
     }
 
-    fs.writeFileSync(path, primContent);
-    PluginPrim.gotoFile(PluginPrim.Cache, file);
+    if (!fs.existsSync(primFilePath)) {
+      fs.writeFileSync(primFilePath, primContent);
+    }
 
-    return PluginPrim.pathJoin([PluginPrim.Cache, file]);
+    return path.join(this.cache, file);
   }
 
-  static makeFlat(values, type) {
-    const dim = PluginPrim.RegexFlatParams.exec(values[0]);
+  /**
+   * Generates a flat primitive.
+   * @param {string[]} values - The values.
+   * @param {string} type - The type.
+   * @return {string} - The primitive.
+   */
+  makeFlat(values, type) {
+    const dim = regexFlatParams.exec(values[0]);
 
     if (!dim) {
-      PluginPrim.gotoError(400, 'Invalid prim syntax');
+      this.gotoError(400, 'Invalid prim syntax');
     }
 
     // Dimension checking (reads values as mm)
     const rawX = parseFloat(dim.groups.x);
-    const rawY = (dim.groups.y && !isNaN(dim.groups.y)) ? parseFloat(dim.groups.y) : parseFloat(dim.groups.x);
+    const rawY = (dim.groups.y && !isNaN(dim.groups.y)) ?
+      parseFloat(dim.groups.y) : parseFloat(dim.groups.x);
     console.log('Flat prim', `Raw X ${rawX} by Raw Y ${rawY}`);
 
     const dimXFactor = 2;
-    const dimYFactor = (type === PluginPrim.FlatFlat || type === PluginPrim.FlatFloor || type === PluginPrim.FlatTrifloor) ? 2 : 1;
+    const dimYFactor = (type === this.flatFlat || type === this.flatFloor ||
+      type === this.flatTrifloor) ? 2 : 1;
 
-    const dimX = rawX / (PluginPrim.MMX * dimXFactor);
-    const dimY = rawY / (PluginPrim.MMY * dimYFactor);
+    const dimX = rawX / (this.mmx * dimXFactor);
+    const dimY = rawY / (this.mmy * dimYFactor);
     console.log('Flat prim', `X ${dimX} by Y ${dimY}`);
 
-    if (dimX < PluginPrim.MinValue || dimY < PluginPrim.MinValue) {
-      PluginPrim.gotoError(400, 'Flat primitive is too small');
+    if (dimX < this.minValue || dimY < this.minValue) {
+      this.gotoError(400, 'Flat primitive is too small');
     }
 
-    if (dimX > PluginPrim.MaxValue || dimY > PluginPrim.MaxValue) {
-      PluginPrim.gotoError(400, 'Flat primitive is too large');
+    if (dimX > this.maxValue || dimY > this.maxValue) {
+      this.gotoError(400, 'Flat primitive is too large');
     }
 
     // Phantom parameter
     const phantom = (dim.groups.p && !isNaN(dim.groups.p)) ? 'off' : 'on';
 
     // Tags
-    // const tag = (values[1] && !isNaN(values[1])) ? PluginPrim.parseTagNumber(values[1]) : 200;
     let tag = 200;
     if (values[1] && values[1] === 's') {
       tag = 100;
     }
-    console.log(values);
     // UV coordinates
-    // const uvX = values[2] || false;
-    // const uvY = values[3] || false;
     const uvX = (typeof values[2] !== 'undefined') ? values[2] : false;
     const uvY = (typeof values[3] !== 'undefined') ? values[3] : false;
 
-    const uv = (type === PluginPrim.FlatFlat || type === PluginPrim.FlatPanel || type === PluginPrim.FlatFacer) ?
-      PluginPrim.uvFill(uvX, uvY) :
-      PluginPrim.uvPlanar(uvX, uvY, rawX, rawY);
+    const uv = (type === this.flatFlat || type === this.flatPanel ||
+      type === this.flatFacer) ?
+      this.uvFill(uvX, uvY) :
+      this.uvPlanar(uvX, uvY, rawX, rawY);
 
     // Generate using template
     console.log('Flat', `Type: ${type}`);
-    console.log('Flat', `Dimensions: ${dimX} by ${dimY}, tag: ${tag}, uvX scale: ${uv[0]}, uvY scale: ${uv[1]}, collision: ${phantom}`);
-    const template = PluginPrim.getPrimTemplate(type);
+    console.log('Flat', `Dimensions: (${dimX} by ${dimY})`);
+    console.log(`Tag: ${tag}, uvX scale: ${uv[0]}, uvY scale: ${uv[1]}`);
+    console.log(`Collision: ${phantom}`);
+    const template = this.getPrimTemplate(type);
     const prim = template
         .replace(/%1\$.4f/g, dimX)
         .replace(/%2\$.4f/g, dimY)
@@ -185,11 +195,24 @@ export default class PluginPrim {
     return prim;
   }
 
-  static getPrimTemplate(template) {
-    const path = PluginPrim.pathJoin([PluginPrim.Templates, `${template}.txt`]);
-    return fs.readFileSync(path, 'utf-8');
+  /**
+   * Gets the prim template.
+   * @param {string} template - The template.
+   * @return {string} - The template content.
+   */
+  getPrimTemplate(template) {
+    const templatePath = path.join(this.templates, `${template}.txt`);
+    return fs.readFileSync(templatePath, 'utf-8');
   }
-  static uvFill(x, y) {
+
+
+  /**
+   * Fills UV coordinates.
+   * @param {string|number} x - The x coordinate.
+   * @param {string|number} y - The y coordinate.
+   * @return {number[]} - The UV coordinates.
+   */
+  uvFill(x, y) {
     if (!x) {
       return [1, 1];
     } else if (!isNaN(x) && !y) {
@@ -202,25 +225,40 @@ export default class PluginPrim {
     }
   }
 
-  static uvPlanar(x, y, rawX, rawY) {
+  /**
+   * Calculates UV coordinates for planar surfaces.
+   * @param {string|number} x - The x coordinate.
+   * @param {string|number} y - The y coordinate.
+   * @param {number} rawX - The raw x value.
+   * @param {number} rawY - The raw y value.
+   * @return {number[]} - The UV coordinates.
+   */
+  uvPlanar(x, y, rawX, rawY) {
     let uvX = null;
     let uvY = null;
     if (!x) {
-      uvX = rawX / (PluginPrim.MMUV / 1);
-      uvY = rawY / (PluginPrim.MMUV / 1);
+      uvX = rawX / (this.mmuv / 1);
+      uvY = rawY / (this.mmuv / 1);
     } else if (!isNaN(x) && !y) {
-      uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
-      uvY = rawY / (PluginPrim.MMUV / parseFloat(x));
+      uvX = rawX / (this.mmuv / parseFloat(x));
+      uvY = rawY / (this.mmuv / parseFloat(x));
     } else if (!isNaN(x) && !isNaN(y)) {
-      uvX = rawX / (PluginPrim.MMUV / parseFloat(x));
-      uvY = rawY / (PluginPrim.MMUV / parseFloat(y));
+      uvX = rawX / (this.mmuv / parseFloat(x));
+      uvY = rawY / (this.mmuv / parseFloat(y));
     } else {
       throw new Error('Invalid UV parameters');
     }
     return [uvX, uvY];
   }
 
-  static parseTagNumber(val) {
+
+  /**
+   * Parses tag value.
+   * TODO: Handle 100/200 (e.g. p:w400,200.rwx)?
+   * @param {string|number} val - The value to parse.
+   * @return {number} - The Tag number for given tag type
+   */
+  parseTagNumber(val) {
     switch (val) {
       case 'p':
         return 200;
@@ -230,23 +268,17 @@ export default class PluginPrim {
         if (!isNaN(val)) {
           return parseInt(val, 10);
         } else {
-          PluginPrim.gotoError(400, 'Invalid tag parameter');
+          this.gotoError(400, 'Invalid tag parameter');
         }
     }
   }
-
-  static pathJoin(parts) {
-    return path.join(...parts);
-  }
-
-  static gotoFile(cache, file) {
-    // Implement gotoFile logic
-    // For now, I'll log a message to the console
-    console.log(`Goto file: ${path.join(cache, file)}`);
-  }
-  static gotoError(code, message) {
-  // Implement gotoError logic
-  // For now, I'll log an error message to the console
+  /**
+   * Logs an error message and handles error logic.
+   * @param {number} code - The error code.
+   * @param {string} message - The error message.
+   */
+  gotoError(code, message) {
+    // Implement logging to file.
     console.error(`Error ${code}: ${message}`);
   }
 }

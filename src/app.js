@@ -125,9 +125,10 @@ function serveFile(req, res) {
   const fileToServe = path.join(config.serverBasePath, folder, reqFile);
   const primPlugin = new PluginPrim(config.baseVWOPPath);
   const prim = primPlugin.handleRequest(folder, reqFile);
-  console.log('help me? ', folder, reqFile);
+
   if (prim) {
-    res.sendFile(path.join(config.baseVWOPPath, prim));
+    const pathToPrim = path.join(config.baseVWOPPath, prim);
+    res.sendFile(pathToPrim);
   } else {
     res.sendFile(fileToServe);
   }
