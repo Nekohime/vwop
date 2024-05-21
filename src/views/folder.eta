@@ -24,6 +24,7 @@
 			const dialog = document.querySelector('dialog');
 
 			function viewModel(url) {
+				const iframe = document.querySelector('iframe');
 				iframe.src = url;
 				dialog.showModal()
 			}
@@ -32,9 +33,16 @@
 				dialog.close()
 			});
 
-			const iframe = document.querySelector('iframe');
-			iframe.addEventListener('click', (event) => event.stopPropagation());
+			dialog.addEventListener('click', (event) => {
+			  const { top, right, bottom, left } = dialog.getBoundingClientRect();
+			  const { clientX, clientY } = event;
 
+			  const isInDialog = clientY >= top && clientY <= bottom && clientX >= left && clientX <= right;
+
+			  if (!isInDialog) {
+			    dialog.close();
+			  }
+			});
 		</script>
 		<%~ files %>
 
