@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --watch-path=./src src/app.js",
-    "lint": "eslint --ext js 'src/**/*.js' --fix"
+    "lint": "eslint --ext js 'src/**/*.js' --fix",
+    "stylelint": "npx stylelint '**/*.css' --fix"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,9 @@
     "cors": "^2.8.5",
     "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-vue": "^9.24.1",
+    "eslint-plugin-vue": "^9.26.0",
     "eta": "^3.4.0",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "stylelint": "^16.6.0"
   }
 }

@@ -10,7 +10,8 @@ import cors from 'cors';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const devMode = true;
+const args = process.argv.slice(2);
+const devMode = !args.includes('--prod');
 
 const config = {
   // URL to Model Viewer (not included)

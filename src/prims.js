@@ -17,7 +17,7 @@ export default class PluginPrim {
   constructor(baseVWOPPath) {
     this.baseVWOPPath = baseVWOPPath;
     this.cache = 'prims';
-    this.templates = 'src/assets/prims/templates';
+    this.templates = 'src/assets/primtemplates';
 
     this.mmx = 1000.0;
     this.mmy = 1000.0;
